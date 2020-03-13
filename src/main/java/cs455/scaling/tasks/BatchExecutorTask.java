@@ -16,7 +16,7 @@ public class BatchExecutorTask implements TaskInterface {
     @Override
     public void onTask() {
         for (TaskInterface taskInterface : batch) {
-            taskInterface.onTask(); //Execute the task for eaach instance of task
+            taskInterface.onTask(); //Execute the task for each instance of task
         }
     }
 }
