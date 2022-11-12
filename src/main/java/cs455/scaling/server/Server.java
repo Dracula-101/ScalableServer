@@ -158,14 +158,15 @@ public class Server {
 
 
     public static void main(String[] args) {
-        if (args.length < 4) {
-            System.out.println("Please provide 4 arguments.\nUsage: "
-                    + "java cs455.scaling.server.Server <portNum> <thread-pool-size> <batch-size> <batch-time>\n"
-                    + "Exiting");
-            System.exit(1);
-        }
+        // if (args.length < 4) {
+        // System.out.println("Please provide 4 arguments.\nUsage: "
+        // + "java cs455.scaling.server.Server <portNum> <thread-pool-size> <batch-size>
+        // <batch-time>\n"
+        // + "Exiting");
+        // System.exit(1);
+        // }
         try {
-            new Server(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]), Double.parseDouble(args[3]));
+            new Server(7000, 12, 10, 2.5);
         } catch (IOException e) {
             if (Constants.DEBUG) {
                 System.out.println("Server Constructor threw error");

@@ -141,12 +141,7 @@ public class Client {
     }
 
     public static void main(String[] args) {
-        if (args.length < 3) {
-            System.out.println("Please provide 3 arguments.\nUsage: "
-                    + "java cs455.scaling.client.Client <server-host> <server-port> <message-rate>\n"
-                    + "Exiting");
-            System.exit(1);
-        }
-        new Client(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+
+        new Client("localhost", 7000, 4);
     }
 }
