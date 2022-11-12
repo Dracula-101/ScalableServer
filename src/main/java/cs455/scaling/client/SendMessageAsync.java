@@ -8,9 +8,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Random;
 
-/**
- * This class enables each Client to send randomly generated payloads of 8KB each at regular intervals to the lone Server
- */
+
 public class SendMessageAsync implements Runnable {
     private Client client;
     private SocketChannel channel;

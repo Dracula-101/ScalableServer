@@ -1,8 +1,6 @@
 package cs455.scaling.helpers;
 
-/**
- * Class encapsulating implementation-level constants
- */
+// * Class encapsulating implementation-level constants
 public class Constants {
     public static final boolean DEBUG = false; //Set DEBUG mode
 

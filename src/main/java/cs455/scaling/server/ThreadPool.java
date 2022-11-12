@@ -6,11 +6,7 @@ import cs455.scaling.tasks.TaskInterface;
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
 
-/**
- * Class managing the thread pool. This class is responsible for storing the task list, for notifying executor threads about
- * new tasks that are ready to be executed. This class is responsible for the batching of tasks and for initializing the
- * executor(worker) threads.
- */
+
 class ThreadPool {
     private int numThreads;
     private int batchSize;

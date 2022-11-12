@@ -4,9 +4,8 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-/**
- * Class containing a static method that returns the SHA-1 hash for a given byte array
- */
+// * Class containing a static method that returns the SHA-1 hash for a given byte array
+
 public class Hasher {
     public static String SHA1FromBytes(byte[] data) {
         MessageDigest digest = null;

@@ -15,13 +15,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * The Server class encapsulates all functionalities of the Server and coordinates all tasks by designating them to the thread pool.
- * The Server listens for messages from the various clients that have opened connection with the server. The Server has many tasks,
- * namely, accepting client connections, listening for client messages in a non-blocking fashion, computing hashcode of message
- * sent by client and reporting the hash back to client and the batching of these tasks as well. Every 20 seconds the Server will
- * also print statistics involving its throughput and per-client efficiencies and deviations.
- */
 
 public class Server {
     private Selector selector;
@@ -39,6 +32,7 @@ public class Server {
         serverSocketChannel.configureBlocking(false); //enable non-blocking I/O
         serverSocketChannel.socket().bind(new InetSocketAddress(port)); //bind serversocket to the designated port
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT); //register intent to accept connections
+        System.out.println("Server listening on port " + port);
 
         new ServerStats(this).startExecution();
         threadPool = new ThreadPool(batchSize, batchTime * 1000, poolSize); //Initialize the thread pool class with user-defined constraints
@@ -46,11 +40,6 @@ public class Server {
         startKeyWiseMultiplexing();
     }
 
-    /**
-     * This function uses the the non-blocking selectNow call to get the set of keys from an active channel and uses
-     * these keys to either accept connections on the channel or to facilitate reading of messages from the clients
-     * over the channel.
-     */
     private void startKeyWiseMultiplexing() {
         while (true) {
             try {
@@ -94,11 +83,6 @@ public class Server {
         }
     }
 
-    /**
-     * Function to establish connection to a client and to initialize per-client statistics for this client using the
-     * selection key that was passed from the task.
-     * @param key
-     */
     public void acceptConnections(SelectionKey key) {
         try {
             if (Constants.DEBUG) {
@@ -120,18 +104,17 @@ public class Server {
 
     synchronized void printStats() {
         synchronized (perClientStatsMap) {
-            System.out.println("\n[" + System.currentTimeMillis() + "]\nServer Throughput: " + (tasksServedByServer.get() / Constants.STATS_LOGGER_INTERVAL_SECS)
-                    + " messages/s\nActive Client Connections: " + perClientStatsMap.size() + "\nMean Per-Client Throughput: "
-                    + (meanPerClientThroughput() / Constants.STATS_LOGGER_INTERVAL_SECS) + " messages/s\nStd. Dev. of Per-Client Throughput: "
-                    + (stdDevPerClientThroughput(meanPerClientThroughput()) / Constants.STATS_LOGGER_INTERVAL_SECS) + " messages/s\n");
+            System.out.println("--------------------------------------------------------");
+            System.out.println("\n(" + System.currentTimeMillis() + ")");
+            System.out.println(
+                    "Server Throughtput\t\t" + (tasksServedByServer.get()) / Constants.STATS_LOGGER_INTERVAL_SECS);
+            System.out.println("Active Client Connections\t" + perClientStatsMap.size());
+            System.out.println("Mean Per-Client Throughput\t"
+                    + (meanPerClientThroughput()) / Constants.STATS_LOGGER_INTERVAL_SECS + " messages");
             tasksServedByServer.set(0);
         }
     }
 
-    /**
-     * Calculate mean throughput per-client
-     * @return
-     */
     private double meanPerClientThroughput() {
         int sum = 0;
         for (SocketChannel channel : perClientStatsMap.keySet()) {
@@ -140,33 +123,11 @@ public class Server {
         return (double) sum / perClientStatsMap.size();
     }
 
-    /**
-     * Use the mean to calculate per-client standard deviation per second
-     * @param mean
-     * @return
-     */
-    private double stdDevPerClientThroughput(double mean) {
-        double sd = 0.0;
-
-        for (SocketChannel channel : perClientStatsMap.keySet()) {
-            sd += Math.pow(perClientStatsMap.get(channel) - mean, 2);
-            perClientStatsMap.put(channel, 0);
-        }
-
-        return Math.sqrt(sd / perClientStatsMap.size()) / Constants.STATS_LOGGER_INTERVAL_SECS;
-    }
 
 
     public static void main(String[] args) {
-        // if (args.length < 4) {
-        // System.out.println("Please provide 4 arguments.\nUsage: "
-        // + "java cs455.scaling.server.Server <portNum> <thread-pool-size> <batch-size>
-        // <batch-time>\n"
-        // + "Exiting");
-        // System.exit(1);
-        // }
         try {
-            new Server(7000, 12, 10, 2.5);
+            new Server(5000, 12, 10, 2.5);
         } catch (IOException e) {
             if (Constants.DEBUG) {
                 System.out.println("Server Constructor threw error");

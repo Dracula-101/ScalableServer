@@ -4,10 +4,7 @@ import cs455.scaling.tasks.TaskInterface;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-/**
- * This class is the implementation of a worker thread that waits when the queue is empty and as soon as it gets a notify
- * signal, it polls a task from the blocking queue, executes it and goes back to waiting.
- */
+
 public class TaskExecutorThread extends Thread {
     private LinkedBlockingQueue<TaskInterface> FIFO_QUEUE; //Thread-safe blocking queue for queueing tasks from which threads can pick a task and execute
 

@@ -13,13 +13,6 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * The Client class encapsulates all functionalities of the Client and coordinates message sending at a fixed rate to the server.
- * The Client also listens for responses from the server. The Client matches the hashcode sent by the server and keeps track of
- * messages received. The client accomplishes this by opening a socket channel to the server and writing and reading communications
- * over this channel. Every 20 seconds the client prints out statistics for the number of messages exchanged between this Client and
- * the lone server.
- */
 
 public class Client {
     private Selector selector;
@@ -45,6 +38,7 @@ public class Client {
             clientSocket = SocketChannel.open(new InetSocketAddress(hostname, port)); //Open socket channel with server
             clientSocket.configureBlocking(false); //Configure blocking to false, thus making I/O non-blocking
             clientSocket.register(selector, SelectionKey.OP_READ);
+            System.out.println("Client connected to server at " + hostname + ":" + port);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -60,12 +54,6 @@ public class Client {
         }
     }
 
-    /**
-     * This method subscribes to the blocking select call and uses the set of keys returned on an active channel so that
-     * the client can successfully read on this channel. The client reads the hashcodes sent by the server and matches that
-     * with the hash it had stored before sending over the payload.
-     * @throws IOException
-     */
     private void blockAndReadMessages() throws IOException {
         while (true) {
             selector.select();
@@ -107,11 +95,6 @@ public class Client {
         }
     }
 
-    /**
-     * Method that tallies the hash parameter with the hashlist, confirming/denying presence of hash in the list
-     * @param hash
-     * @return
-     */
     private String containsHash(String hash) {
         for (String h : hashList) {
             if (h.equals(hash)) {
@@ -128,7 +111,10 @@ public class Client {
 
 
     synchronized void printStats() {
-        System.out.println("\n[" + System.currentTimeMillis() + "] " + "Total Sent Count: " + messageSentCount + " Total Received Count: " + messageReceivedCount + "\n");
+        System.out.println("------------------------------------------------------------------\n");
+        System.out.println("(" + System.currentTimeMillis() + ")");
+        System.out.println("Total Sent Count:\t\t" + messageSentCount + "\n"
+                + "Total Received Count:\t\t" + messageReceivedCount + "\n");
         messageSentCount.set(0);
         messageReceivedCount.set(0);
     }
@@ -142,6 +128,6 @@ public class Client {
 
     public static void main(String[] args) {
 
-        new Client("localhost", 7000, 4);
+        new Client("localhost", 5000, 4);
     }
 }

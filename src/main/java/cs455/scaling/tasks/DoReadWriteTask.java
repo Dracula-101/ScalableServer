@@ -8,11 +8,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
-/**
- * Class implementing the TaskInterface interface in order to do a task, which in this case is to read a message from
- *the Client and to compute the corresponding hashcode and relay the hashcode back to the Client. This is one of the tasks
- * executed by any one of the threads in the thread pool.
- */
+
 public class DoReadWriteTask implements TaskInterface {
     private SelectionKey selectionKey;
 
