@@ -1,16 +1,16 @@
-package cs455.scaling.server;
+package cs304.scaling.server;
 
-import cs455.scaling.helpers.Constants;
+import cs304.scaling.utils.AppConstants;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class ServerStats extends TimerTask {
+public class ServerProfile extends TimerTask {
     private Timer timer;
     private Server server;
 
-    ServerStats(Server server) {
+    ServerProfile(Server server) {
         this.server = server;
         this.timer = new Timer("ServerStatsDisplayer");
     }
@@ -21,6 +21,6 @@ public class ServerStats extends TimerTask {
     }
 
     void startExecution() {
-        timer.scheduleAtFixedRate(this, Constants.STATS_LOGGER_START_DELAY_MILLIS, Constants.STATS_LOGGER_INTERVAL_MILLIS);
+        timer.scheduleAtFixedRate(this, AppConstants.STATS_LOGGER_START_DELAY_MILLIS, AppConstants.STATS_LOGGER_INTERVAL_MILLIS);
     }
 }

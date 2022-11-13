@@ -1,8 +1,8 @@
-package cs455.scaling.server;
+package cs304.scaling.server;
 
-import cs455.scaling.helpers.Constants;
-import cs455.scaling.tasks.AcceptConnectionsTask;
-import cs455.scaling.tasks.DoReadWriteTask;
+import cs304.scaling.functions.ConnectionAcceptor;
+import cs304.scaling.utils.AppConstants;
+import cs304.scaling.functions.ReadWriter;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -34,7 +34,7 @@ public class Server {
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT); //register intent to accept connections
         System.out.println("Server listening on port " + port);
 
-        new ServerStats(this).startExecution();
+        new ServerProfile(this).startExecution();
         threadPool = new ThreadPool(batchSize, batchTime * 1000, poolSize); //Initialize the thread pool class with user-defined constraints
         threadPool.initiateThreads(); //Start each thread the thread pool and make them subscribe to the task queue
         startKeyWiseMultiplexing();
@@ -56,17 +56,17 @@ public class Server {
                 it.remove();
                 if (selectionKey.isAcceptable()) {
                     selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_ACCEPT);
-                    AcceptConnectionsTask task = new AcceptConnectionsTask(this, selectionKey); //create an accept connections task
+                    ConnectionAcceptor task = new ConnectionAcceptor(this, selectionKey); //create an accept connections task
                     //threadPool.addTaskToBatch(task);
                     threadPool.notifyAndExecuteImmediate(task); // Add accept connections task to immediate list and notify available threads of this slightly prioritised task
-                    if (Constants.DEBUG) {
+                    if (AppConstants.DEBUG) {
                         System.out.println("Adding Accept Task to tasklist in Server");
                     }
                 } else if (selectionKey.isReadable()) {
                     SocketChannel clientChannel = (SocketChannel) selectionKey.channel();
                     tasksServedByServer.incrementAndGet(); //Increment server tasks served
 
-                    if (Constants.DEBUG) {
+                    if (AppConstants.DEBUG) {
                         System.out.println("Adding Read/Write Task to tasklist in Server");
                     }
 
@@ -75,7 +75,7 @@ public class Server {
                         perClientStatsMap.put(clientChannel, ++count); //Increment message received count for particular client(indexed by their channel)
                     }
 
-                    DoReadWriteTask readWriteTask = new DoReadWriteTask(selectionKey); //Create read-write task
+                    ReadWriter readWriteTask = new ReadWriter(selectionKey); //Create read-write task
                     selectionKey.interestOps(selectionKey.interestOps() & SelectionKey.OP_READ);
                     threadPool.addTaskToBatch(readWriteTask); //Add read-write task to task list to be batched
                 }
@@ -85,7 +85,7 @@ public class Server {
 
     public void acceptConnections(SelectionKey key) {
         try {
-            if (Constants.DEBUG) {
+            if (AppConstants.DEBUG) {
                 System.out.println("Adding new connection in Server");
             }
             SocketChannel clientChannel = serverSocketChannel.accept();
@@ -107,10 +107,12 @@ public class Server {
             System.out.println("--------------------------------------------------------");
             System.out.println("\n(" + System.currentTimeMillis() + ")");
             System.out.println(
-                    "Server Throughtput\t\t" + (tasksServedByServer.get()) / Constants.STATS_LOGGER_INTERVAL_SECS);
+                    "Server Throughtput\t\t" + (tasksServedByServer.get()) / AppConstants.STATS_LOGGER_INTERVAL_SECS);
             System.out.println("Active Client Connections\t" + perClientStatsMap.size());
             System.out.println("Mean Per-Client Throughput\t"
-                    + (meanPerClientThroughput()) / Constants.STATS_LOGGER_INTERVAL_SECS + " messages");
+                    + (meanPerClientThroughput()) / AppConstants.STATS_LOGGER_INTERVAL_SECS + " messages");
+            System.out.println("Std-Dev of Per-Client \t\t" + (stdDevPerClientThroughput(
+                    meanPerClientThroughput()) / AppConstants.STATS_LOGGER_INTERVAL_SECS) + " messages");
             tasksServedByServer.set(0);
         }
     }
@@ -123,13 +125,30 @@ public class Server {
         return (double) sum / perClientStatsMap.size();
     }
 
+    private double stdDevPerClientThroughput(double mean) {
+        double sd = 0.0;
+
+        for (SocketChannel channel : perClientStatsMap.keySet()) {
+            sd += Math.pow(perClientStatsMap.get(channel) - mean, 2);
+            perClientStatsMap.put(channel, 0);
+        }
+
+        return Math.sqrt(sd / perClientStatsMap.size()) / AppConstants.STATS_LOGGER_INTERVAL_SECS;
+    }
 
 
     public static void main(String[] args) {
+        if (args.length < 4) {
+            System.out.println("Please provide 4 arguments.\nUsage: "
+                    + "java cs304.scaling.server.Server <portNum> <thread-pool-size> <batch-size> <batch-time>\n"
+                    + "Exiting");
+            System.exit(1);
+        }
         try {
-            new Server(5000, 12, 10, 2.5);
+            new Server(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]),
+                    Double.parseDouble(args[3]));
         } catch (IOException e) {
-            if (Constants.DEBUG) {
+            if (AppConstants.DEBUG) {
                 System.out.println("Server Constructor threw error");
             }
             e.printStackTrace();

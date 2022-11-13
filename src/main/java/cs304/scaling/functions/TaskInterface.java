@@ -1,4 +1,4 @@
-package cs455.scaling.tasks;
+package cs304.scaling.functions;
 
 
 public interface TaskInterface {

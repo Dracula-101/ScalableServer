@@ -1,14 +1,14 @@
-package cs455.scaling.server;
+package cs304.scaling.server;
 
-import cs455.scaling.tasks.TaskInterface;
+import cs304.scaling.functions.TaskInterface;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
 
-public class TaskExecutorThread extends Thread {
+public class WorkerThread extends Thread {
     private LinkedBlockingQueue<TaskInterface> FIFO_QUEUE; //Thread-safe blocking queue for queueing tasks from which threads can pick a task and execute
 
-    TaskExecutorThread(LinkedBlockingQueue<TaskInterface> FIFO_QUEUE) {
+    WorkerThread(LinkedBlockingQueue<TaskInterface> FIFO_QUEUE) {
         this.FIFO_QUEUE = FIFO_QUEUE;
     }
 

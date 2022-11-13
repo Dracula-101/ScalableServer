@@ -1,7 +1,7 @@
-package cs455.scaling.server;
+package cs304.scaling.server;
 
-import cs455.scaling.tasks.BatchExecutorTask;
-import cs455.scaling.tasks.TaskInterface;
+import cs304.scaling.functions.BatchExecutorTask;
+import cs304.scaling.functions.TaskInterface;
 
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -31,7 +31,7 @@ class ThreadPool {
     void initiateThreads() {
         int tNum = 0;
         while (tNum < numThreads) {
-            new TaskExecutorThread(executionUnitTasks).start();
+            new WorkerThread(executionUnitTasks).start();
             tNum++;
         }
     }

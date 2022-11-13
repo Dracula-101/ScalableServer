@@ -1,7 +1,7 @@
-package cs455.scaling.helpers;
+package cs304.scaling.utils;
 
 // * Class encapsulating implementation-level constants
-public class Constants {
+public class AppConstants {
     public static final boolean DEBUG = false; //Set DEBUG mode
 
     public static final int PER_SECOND = 1000; //This is divided by MessageRate to set up an interval between successive client messages

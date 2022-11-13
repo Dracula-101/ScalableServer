@@ -1,6 +1,6 @@
-package cs455.scaling.client;
+package cs304.scaling.client;
 
-import cs455.scaling.helpers.Constants;
+import cs304.scaling.utils.AppConstants;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -32,7 +32,7 @@ public class Client {
         messageReceivedCount = new AtomicInteger(0);
         hashList = new LinkedList<>();
 
-        new ClientStats(this).startExecution(); //Start the Timer Task that prints Client statistics
+        new ClientProfile(this).startExecution(); //Start the Timer Task that prints Client statistics
 
         try {
             clientSocket = SocketChannel.open(new InetSocketAddress(hostname, port)); //Open socket channel with server
@@ -44,7 +44,7 @@ public class Client {
             e.printStackTrace();
         }
 
-        Thread t = new Thread(new SendMessageAsync(this, messagingRate, clientSocket));
+        Thread t = new Thread(new AsyncMessage(this, messagingRate, clientSocket));
         t.start(); //Start thread for sending message to server at specified regular intervals
 
         try {
@@ -65,7 +65,7 @@ public class Client {
                 it.remove(); //Remove key immediately to avoid processing this key again.
 
                 if (selectionKey.isReadable()) {
-                    ByteBuffer readBuffer = ByteBuffer.allocate(Constants.BYTES_PER_HASH); //Allocate 40 bytes to ByteBuffer to read hash
+                    ByteBuffer readBuffer = ByteBuffer.allocate(AppConstants.BYTES_PER_HASH); //Allocate 40 bytes to ByteBuffer to read hash
                     int numBytesRead = 0;
                     //SocketChannel channel = (SocketChannel) selectionKey.channel();
                     while (readBuffer.hasRemaining() && numBytesRead != -1) {
@@ -79,12 +79,12 @@ public class Client {
                     synchronized (hashList) {
                         String foundHash = containsHash(hash); //Indicator for the presence of hash in HashList
                         if (foundHash != null) {
-                            if (Constants.DEBUG) {
+                            if (AppConstants.DEBUG) {
                                 System.out.println("Hashes Matched. Removing hash " + hash + " from linked list.");
                             }
                             hashList.remove(foundHash);
                         } else {
-                            if (Constants.DEBUG) {
+                            if (AppConstants.DEBUG) {
                                 System.out.println(hash + " not found in hashlist");
                             }
                         }
@@ -120,14 +120,19 @@ public class Client {
     }
 
     synchronized void updateHashes(String hashOfPayload) {
-        if(Constants.DEBUG) {
+        if(AppConstants.DEBUG) {
             System.out.println(hashOfPayload + " to hashlist");
         }
         hashList.add(hashOfPayload);
     }
 
     public static void main(String[] args) {
-
-        new Client("localhost", 5000, 4);
+        if (args.length < 3) {
+            System.out.println("Please provide 3 arguments.\nUsage: "
+                    + "java cs304.scaling.client.Client <server-host> <server-port> <message-rate>\n"
+                    + "Exiting");
+            System.exit(1);
+        }
+        new Client(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]));
     }
 }
